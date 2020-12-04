@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  loadbalancer-nginx:
+    restart: always
+    build: ./loadbalancer-nginx
+    volumes:
+      - ./loadbalancer-nginx/logs:/var/log/nginx
+    ports:
+      - "8080:8080"
+
+  front-react:
+    build: ./front-react
+    ports:
+      - "3000:3000"
+    volumes: 
+      - /usr/app/node_modules
+      - ./front-react:/usr/app
+  
+  back-express:
+    restart: always
+    build: ./back-express
+    ports: 
+      - "3001:3001"
+    volumes:
+      - /usr/app/node_modules
+      - ./back-express:/usr/app
+    links:
+      - db-mongo
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+
+  db-mongo: 
+      container_name: db-mongo
+      image: mongo
+      ports: 
+        - "27017:27017"
+      volumes:
+        - ./db-mongo/data:/data/db
+      restart: always
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: example
+        
+  
+        
